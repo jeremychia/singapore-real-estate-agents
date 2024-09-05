@@ -1,5 +1,5 @@
 # all tokens
-token/
+*/token/
 
 # Ignore Python bytecode files
 **/__pycache__/
