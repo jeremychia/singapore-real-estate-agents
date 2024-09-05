@@ -1,0 +1,10 @@
+version: 2
+sources:
+  - name: estate_agents
+    tables:
+      - name: agents
+      - name: mobile_numbers
+      - name: hdb_rental
+      - name: hdb_resale
+      - name: private_rental
+      - name: private_sale
