@@ -6,7 +6,7 @@ from datetime import datetime
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
-possible_mobile_numbers_sg = [str(number) for number in range(80004300, 98999999 + 1)]
+possible_mobile_numbers_sg = [str(number) for number in range(81004300, 98999999 + 1)]
 
 mobile_numbers = []
 ids = []
@@ -35,26 +35,32 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
     data = response.json().get("data")
 
     if data:
+        print(f"found match for: {mobile_number}")
         mobile_numbers.append(mobile_number)
         ids.append(data[0]["id"])
         registration_numbers.append(data[0]["registrationNumber"])
         names.append(data[0]["name"])
 
-    if idx % 100 == 0:
-        print(f"Processed {idx} mobile numbers")
+    if idx % 100 == 0 and idx != 0:
+        print(f"Processed {idx} mobile numbers: from {possible_mobile_numbers_sg[idx-100]} to {possible_mobile_numbers_sg[idx]}")
 
+    if idx % 1000 == 0:
+        mobile_numbers_df = pd.DataFrame(
+            {
+                "mobile_number": mobile_numbers,
+                "id": ids,
+                "registration_number": registration_numbers,
+                "name": names,
+                "_accessed_at_utc": [datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z%z")]
+                * len(mobile_numbers),
+            }
+        )
 
-mobile_numbers_df = pd.DataFrame(
-    {
-        "mobile_number": mobile_numbers,
-        "id": ids,
-        "registration_number": registration_numbers,
-        "name": names,
-        "_accessed_at_utc": [datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z%z")]
-        * len(mobile_numbers),
-    }
-)
+        pandas_gbq.to_gbq(
+            mobile_numbers_df, "estate_agents.mobile_numbers", "jeremy-chia", if_exists="append"
+        )
 
-pandas_gbq.to_gbq(
-    mobile_numbers_df, "estate_agents.mobile_numbers", "jeremy-chia", if_exists="append"
-)
+        mobile_numbers = []
+        ids = []
+        registration_numbers = []
+        names = []
