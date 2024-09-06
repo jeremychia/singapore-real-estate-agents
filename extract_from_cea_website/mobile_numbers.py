@@ -6,7 +6,7 @@ from datetime import datetime
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
-possible_mobile_numbers_sg = [str(number) for number in range(81004300, 98999999 + 1)]
+possible_mobile_numbers_sg = [str(number) for number in range(81028300, 98999999 + 1)]
 
 mobile_numbers = []
 ids = []
