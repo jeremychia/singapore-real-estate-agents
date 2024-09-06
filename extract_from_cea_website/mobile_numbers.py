@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import pandas_gbq
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
@@ -18,7 +18,12 @@ headers = {
     "Accept": "application/json",
 }
 
+# Time Log
+average_time = timedelta(seconds=0)
+count_mobile_numbers = len(possible_mobile_numbers_sg)
+
 for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
+    start_time = datetime.now()
     mobile_number_payload = {
         "page": 1,
         "pageSize": 10,
@@ -41,10 +46,18 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
         registration_numbers.append(data[0]["registrationNumber"])
         names.append(data[0]["name"])
 
-    if idx % 100 == 0 and idx != 0:
-        print(f"Processed {idx} mobile numbers: from {possible_mobile_numbers_sg[idx-100]} to {possible_mobile_numbers_sg[idx]}")
+    # Compute end-time
+    end_time = datetime.now()
+    time_diff = end_time - start_time
+    average_time = (average_time * idx + time_diff)/(idx+1)
 
-    if idx % 1000 == 0:
+    if idx % 100 == 0 and idx != 0:
+        remaining_time = average_time * (count_mobile_numbers-idx-1)
+        completion_time = (end_time + remaining_time).strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Complete: {idx+1} out of {count_mobile_numbers} (Average time: {round(time_diff.total_seconds(), 1)}). Estimated completion: {completion_time}")
+
+    if idx % 1000 == 0 and idx != 0:
+        print(f"Uploading: {possible_mobile_numbers_sg[idx-1000]} to {possible_mobile_numbers_sg[idx]}")
         mobile_numbers_df = pd.DataFrame(
             {
                 "mobile_number": mobile_numbers,
