@@ -1,5 +1,8 @@
 import requests
 import pandas as pd
+from datetime import datetime, timedelta
+
+import load
 
 
 def iteratively_retrieve_data(url, headers, base_payload, page_size=100):
@@ -54,7 +57,7 @@ def retrieve_property_data(url, headers, txn_payload, registration_number):
     return df
 
 
-def retrieve_all_data_for_registration_numbers(registration_numbers, headers):
+def retrieve_all_data_for_registration_numbers(registration_numbers, headers, batch_size = 100):
     """
     Function to retrieve property data for multiple registration numbers across multiple transaction types.
 
@@ -73,11 +76,16 @@ def retrieve_all_data_for_registration_numbers(registration_numbers, headers):
     # Base payload for transactions
     txn_payload = {"sortAscFlag": False, "sort": "transactionDate"}
 
+    # Time Log
+    average_time = timedelta(seconds=0)
+
     # Store results in a dictionary of DataFrames
     all_data = {key: pd.DataFrame() for key in urls}
-
+    count_registration_numbers = len(registration_numbers)
     # Iterate over each registration number and each transaction type
-    for registration_number in registration_numbers:
+    for idx, registration_number in enumerate(registration_numbers):
+        start_time = datetime.now()
+        print(f"Progress: {registration_number} ({idx+1} out of {count_registration_numbers})")
         for key, url in urls.items():
             print(
                 f"Retrieving data for {key} and registration number {registration_number}"
@@ -86,5 +94,28 @@ def retrieve_all_data_for_registration_numbers(registration_numbers, headers):
             df = retrieve_property_data(url, headers, txn_payload, registration_number)
             # Append to the corresponding DataFrame in the dictionary
             all_data[key] = pd.concat([all_data[key], df], ignore_index=True)
+        
+        # Compute end-time
+        end_time = datetime.now()
+        time_diff = end_time - start_time
+        average_time = (average_time * idx + time_diff)/(idx+1)
+        remaining_time = average_time * (count_registration_numbers-idx-1)
+        completion_time = (end_time + remaining_time).strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Complete: {idx+1} out of {count_registration_numbers} (Average time: {round(time_diff.total_seconds(), 1)}). Estimated completion: {completion_time}")
 
-    return all_data
+        if idx % batch_size == 0 and idx != 0:
+            hdb_resale_df = all_data["hdb_resale"]
+            load.write_df_to_gbq(hdb_resale_df, "estate_agents", "hdb_resale", if_exists="append")
+
+            hdb_rental_df = all_data["hdb_rental"]
+            load.write_df_to_gbq(hdb_rental_df, "estate_agents", "hdb_rental", if_exists="append")
+
+            private_rental_df = all_data["private_rental"]
+            load.write_df_to_gbq(private_rental_df, "estate_agents", "private_rental", if_exists="append")
+
+            private_sale_df = all_data["private_sale"]
+            load.write_df_to_gbq(private_sale_df, "estate_agents", "private_sale", if_exists="append")
+
+            all_data = {key: pd.DataFrame() for key in urls}
+
+    return 0
