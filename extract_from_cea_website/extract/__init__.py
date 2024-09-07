@@ -116,6 +116,6 @@ def retrieve_all_data_for_registration_numbers(registration_numbers, headers, ba
             private_sale_df = pd.DataFrame(all_data["private_sale"])
             load.write_df_to_gbq(private_sale_df, "estate_agents", "private_sale", if_exists="append")
 
-            all_data = {key: pd.DataFrame() for key in urls}
+            all_data = {key: [] for key in urls}  # Store data as lists
 
     return 0
