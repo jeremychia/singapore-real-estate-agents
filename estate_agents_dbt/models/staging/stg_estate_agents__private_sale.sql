@@ -6,7 +6,7 @@ with
             'sale' as rental_or_resale,
             id as transaction_id,
             date(transactiondate) as transaction_date,
-            district as property_district_number,
+            cast(district as int) as property_district_number,
             generallocation as property_general_location,
             property as property_type,
             client,
@@ -18,7 +18,9 @@ with
     deduplicated as (
         select *
         from renamed
-        qualify row_number() over(partition by transaction_id order by last_updated_at_utc) = 1
+        qualify
+            row_number() over (partition by transaction_id order by last_updated_at_utc)
+            = 1
     )
 select *
 from deduplicated

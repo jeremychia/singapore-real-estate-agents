@@ -17,7 +17,9 @@ with
     deduplicated as (
         select *
         from renamed
-        qualify row_number() over(partition by transaction_id order by last_updated_at_utc) = 1
+        qualify
+            row_number() over (partition by transaction_id order by last_updated_at_utc)
+            = 1
     )
 select *
 from deduplicated

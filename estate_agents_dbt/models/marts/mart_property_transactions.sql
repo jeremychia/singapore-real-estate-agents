@@ -30,6 +30,16 @@ with
         from {{ ref("dim_agents") }}
     ),
 
+    districts as (
+        select property_district_number, region, central_region_category
+        from {{ ref("dim_districts") }}
+    ),
+
+    towns as (
+        select property_town, region, central_region_category
+        from {{ ref("dim_towns") }}
+    ),
+
     joined as (
         select
             property_transactions.transaction_id,
@@ -40,6 +50,13 @@ with
             property_transactions.property_town,
             property_transactions.property_district_number,
             property_transactions.property_general_location,
+            coalesce(
+                cast(districts.region as string), cast(towns.region as string)
+            ) as property_region,
+            coalesce(
+                cast(districts.central_region_category as string),
+                cast(towns.central_region_category as string)
+            ) as property_central_region_category,
             property_transactions.property_type,
             property_transactions.client,
             agents.agent_id,
@@ -57,6 +74,13 @@ with
             agents
             on property_transactions.agent_registration_number
             = agents.agent_registration_number
+        left join
+            districts
+            on coalesce(property_transactions.property_district_number, 0)
+            = districts.property_district_number
+        left join
+            towns
+            on coalesce(property_transactions.property_town, ' ') = towns.property_town
     )
 
 select *
