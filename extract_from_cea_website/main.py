@@ -24,8 +24,11 @@ directory_url = (
 sql = """
 select registrationNumber
 from `jeremy-chia.estate_agents.agents`
+where registrationNumber > 'R003701C'
 order by registrationNumber asc
 """
+
+# start from R003706D
 
 agents_df = pandas_gbq.read_gbq(
     query_or_table=sql,
