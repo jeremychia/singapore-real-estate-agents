@@ -49,15 +49,19 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
     # Compute end-time
     end_time = datetime.now()
     time_diff = end_time - start_time
-    average_time = (average_time * idx + time_diff)/(idx+1)
+    average_time = (average_time * idx + time_diff) / (idx + 1)
 
     if idx % 100 == 0 and idx != 0:
-        remaining_time = average_time * (count_mobile_numbers-idx-1)
+        remaining_time = average_time * (count_mobile_numbers - idx - 1)
         completion_time = (end_time + remaining_time).strftime("%Y-%m-%d %H:%M:%S")
-        print(f"Complete: {idx+1} out of {count_mobile_numbers} (Average time: {round(time_diff.total_seconds(), 1)}). Estimated completion: {completion_time}")
+        print(
+            f"Complete: {idx+1} out of {count_mobile_numbers} (Average time: {round(time_diff.total_seconds(), 1)}). Estimated completion: {completion_time}"
+        )
 
     if idx % 1000 == 0 and idx != 0:
-        print(f"Uploading: {possible_mobile_numbers_sg[idx-1000]} to {possible_mobile_numbers_sg[idx]}")
+        print(
+            f"Uploading: {possible_mobile_numbers_sg[idx-1000]} to {possible_mobile_numbers_sg[idx]}"
+        )
         mobile_numbers_df = pd.DataFrame(
             {
                 "mobile_number": mobile_numbers,
@@ -70,7 +74,10 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
         )
 
         pandas_gbq.to_gbq(
-            mobile_numbers_df, "estate_agents.mobile_numbers", "jeremy-chia", if_exists="append"
+            mobile_numbers_df,
+            "estate_agents.mobile_numbers",
+            "jeremy-chia",
+            if_exists="append",
         )
 
         mobile_numbers = []
