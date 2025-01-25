@@ -1,0 +1,19 @@
+[tool.sqlfmt]
+dialect = "bigquery"
+
+[tool.poetry]
+name = "estate-agents-dbt"
+version = "0.1.0"
+description = ""
+authors = ["jeremychia <jeremyjchia@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+dbt-core = "^1.9.1"
+dbt-bigquery = "^1.9.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
