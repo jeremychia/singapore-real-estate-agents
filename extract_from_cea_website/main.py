@@ -20,12 +20,12 @@ directory_url = (
 )
 
 # agents_df = extract.iteratively_retrieve_data(directory_url, headers, directory_payload)
-# load.write_df_to_gbq(agents_df, "estate_agents", "agents")
+# load.write_df_to_gbq(agents_df, "estate_agents", "agents", if_exists="append")
 
 sql = """
-select registrationNumber
+select distinct registrationNumber
 from `jeremy-chia.estate_agents.agents`
-where registrationNumber > 'R011469G'
+where registrationNumber > 'R019369D'
 order by registrationNumber asc
 """
 
