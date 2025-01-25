@@ -23,6 +23,8 @@ directory_url = (
 agents_df = extract.iteratively_retrieve_data(directory_url, headers, directory_payload)
 load.write_df_to_gbq(agents_df, "estate_agents", "agents", if_exists="append")
 
+deduplication.deduplicate_agents()
+
 sql = """
 select distinct registrationNumber
 from `jeremy-chia.estate_agents.agents`

@@ -113,37 +113,36 @@ def deduplicate_data(
 
         pandas_gbq.to_gbq(
             dataframe=deduplicated_df,
-            destionation_table=f'estate_agents.{transaction_type}',
+            destionation_table=f"estate_agents.{transaction_type}",
             project_id=project_id,
-            if_exists="replace"
+            if_exists="replace",
         )
 
     return 0
 
-def _deduplicate_agents(df, primary_key):
 
+def _deduplicate_agents(df, primary_key):
     deduplicated_df = df.drop_duplicates(
-        subset=primary_key,
-        keep='last',
-        inplace=False,
-        ignore_index=True
+        subset=primary_key, keep="last", inplace=False, ignore_index=True
     )
 
     return deduplicated_df
 
+
 def deduplicate_agents():
-    
-    df = _read_data('agents')
+    df = _read_data("agents")
     print(f"Pre-deduplicated data for agents has: {len(df)} rows")
 
-    deduplicated_df = _deduplicate_agents(df, primary_key=['registrationNumber', 'licenseNumber'])
+    deduplicated_df = _deduplicate_agents(
+        df, primary_key=["registrationNumber", "licenseNumber"]
+    )
     print(f"Post-deduplicated data for agents has: {len(deduplicated_df)} rows")
 
     pandas_gbq.to_gbq(
         dataframe=deduplicated_df,
-        destination_table='estate_agents.agents_tmp',
+        destination_table="estate_agents.agents",
         project_id=project_id,
-        if_exists="replace"
+        if_exists="replace",
     )
 
     return 0
