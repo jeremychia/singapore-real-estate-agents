@@ -1,3 +1,4 @@
+import pandas as pd
 import pandas_gbq
 from datetime import datetime
 
@@ -13,6 +14,10 @@ def write_df_to_gbq(df, dataset_id, table_id, if_exists="replace"):
     :param table_id: BigQuery table ID
     :param if_exists: What to do if the table already exists (options: 'replace', 'append', 'fail')
     """
+    if not isinstance(df, pd.DataFrame):
+        # Convert to DataFrame if df is not already a DataFrame
+        df = pd.DataFrame(df)
+
     # Construct the full table ID
     table_full_id = f"{dataset_id}.{table_id}"
 
