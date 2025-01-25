@@ -20,14 +20,22 @@ with
             agent_id,
             agent_registration_number,
             agent_name,
-            agent_alias,
+            agent_aliases,
             agent_registration_validity_from,
             agent_registration_validity_to,
             agent_photo_url,
             agent_mobile_number,
-            agency_license_number,
-            agency_name
         from {{ ref("dim_agents") }}
+    ),
+
+    agents_agencies as (
+        select
+            agent_registration_number,
+            agent_licence_validity_from,
+            agent_licence_validity_to,
+            agency_name,
+            agency_license_number,
+        from {{ ref("dim_agents_agencies_scd") }}
     ),
 
     districts as (
@@ -62,18 +70,26 @@ with
             agents.agent_id,
             property_transactions.agent_registration_number,
             agents.agent_name,
-            agents.agent_alias,
+            agents.agent_aliases,
             agents.agent_registration_validity_from,
             agents.agent_registration_validity_to,
             agents.agent_photo_url,
             agents.agent_mobile_number,
-            agents.agency_license_number,
-            agents.agency_name
+            agents_agencies.agency_name,
+            agents_agencies.agency_license_number,
         from property_transactions
         left join
             agents
             on property_transactions.agent_registration_number
             = agents.agent_registration_number
+        left join
+            agents_agencies
+            on property_transactions.agent_registration_number
+            = agents_agencies.agent_registration_number
+            and property_transactions.transaction_date
+            between agents_agencies.agent_licence_validity_from
+            and agents_agencies.agent_licence_validity_to
+
         left join
             districts
             on coalesce(property_transactions.property_district_number, 0)
