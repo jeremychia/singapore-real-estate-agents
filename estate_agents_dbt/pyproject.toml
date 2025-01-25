@@ -1,5 +1,5 @@
 [tool.sqlfmt]
-dialect = "bigquery"
+dialect = "polyglot"
 
 [tool.poetry]
 name = "estate-agents-dbt"
