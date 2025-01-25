@@ -3,7 +3,7 @@ with
         select
             agency_license_number,
             agency_name,
-            agent_id,
+            agent_registration_number,
             agent_registration_validity_from,
             agent_registration_validity_to
         from {{ ref("stg_estate_agents__agents") }}
@@ -13,7 +13,7 @@ with
         select
             agency_license_number,
             agency_name,
-            count(distinct agent_id) as count_agents,
+            count(distinct agent_registration_number) as count_agents,
             min(
                 agent_registration_validity_from
             ) as earliest_agent_registration_validity_from,

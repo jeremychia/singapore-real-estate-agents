@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: dim_agents
+    columns:
+      - name: agent_registration_number
+        data_tests:
+          - not_null
+          - unique
+  - name: dim_agencies
+    columns:
+      - name: agency_license_number
+        data_tests:
+          - not_null
+          - unique

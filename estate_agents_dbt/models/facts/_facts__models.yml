@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: fact_property_transactions
+    columns:
+      - name: transaction_id
+        data_tests:
+          - not_null
+          - unique
