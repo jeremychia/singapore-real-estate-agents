@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: mart_agents
+    columns:
+      - name: agent_registration_number
+        data_tests:
+          - not_null
+          - unique
+
+  - name: mart_property_transactions
+    columns:
+      - name: transaction_id
+        data_tests:
+          - not_null
+          - unique
