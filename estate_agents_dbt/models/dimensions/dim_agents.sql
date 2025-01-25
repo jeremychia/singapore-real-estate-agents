@@ -11,6 +11,7 @@ with
             agency_license_number,
             agency_name
         from {{ ref("stg_estate_agents__agents") }}
+        qualify row_number() over(partition by agent_registration_number order by last_updated_at_utc desc) = 1
     ),
 
     mobile_numbers as (
