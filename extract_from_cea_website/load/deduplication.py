@@ -1,10 +1,21 @@
 import pandas_gbq
+import pandas as pd
+from typing import Union, List
 import load
 
 project_id = "jeremy-chia"
 
 
-def _read_data(transaction_type):
+def _read_data(transaction_type: str) -> pd.DataFrame:
+    """
+    Read data from Google BigQuery for a given transaction type.
+
+    Parameters:
+    transaction_type (str): The transaction type to query from the database.
+
+    Returns:
+    pd.DataFrame: The resulting DataFrame sorted by '_accessed_at_utc'.
+    """
     df = pandas_gbq.read_gbq(
         query_or_table=f"estate_agents.{transaction_type}", project_id=project_id
     )
@@ -15,7 +26,26 @@ def _read_data(transaction_type):
     return df
 
 
-def _validate_primary_key(df, primary_key, secondary_key=None):
+def _validate_primary_key(
+    df: pd.DataFrame, primary_key: Union[str, List[str]], secondary_key: str = None
+) -> bool:
+    """
+    Validate the one-to-one mapping of a secondary key to the primary key in the DataFrame.
+    Skips primary key uniqueness validation since deduplication is assumed.
+
+    Parameters:
+    df (pd.DataFrame): The DataFrame to validate.
+    primary_key (Union[str, List[str]]): The column name (string) or list of column names representing the primary key.
+    secondary_key (str, optional): The column name to validate for one-to-one mapping with the primary key.
+
+    Raises:
+    KeyError: If any column in the primary or secondary key does not exist in the DataFrame.
+    ValueError: If the secondary key is not one-to-one with the primary key.
+
+    Returns:
+    bool: True if the validation passes.
+    """
+
     # check if primary_key is a string or a list
     if isinstance(primary_key, str):
         primary_key = [primary_key]  # convert to list for consistency
@@ -40,7 +70,22 @@ def _validate_primary_key(df, primary_key, secondary_key=None):
     return True
 
 
-def _deduplicate(df, primary_key):
+def _deduplicate(df: pd.DataFrame, primary_key: Union[str, List[str]]) -> pd.DataFrame:
+    """
+    Deduplicate a DataFrame based on the primary key, keeping the first occurrence.
+    Validates the one-to-one mapping of 'registrationNumber' to the primary key.
+
+    Parameters:
+    df (pd.DataFrame): The DataFrame to deduplicate.
+    primary_key (Union[str, List[str]]): The column name (string) or list of column names representing the primary key.
+
+    Raises:
+    ValueError: If the primary key does not result in unique rows after validation.
+
+    Returns:
+    pd.DataFrame: A deduplicated DataFrame.
+    """
+
     if _validate_primary_key(df, primary_key, secondary_key="registrationNumber"):
         # keep first because values are sorted by _accessed_at_utc (when data was downloaded)
         deduplicated = df.drop_duplicates(
@@ -51,17 +96,6 @@ def _deduplicate(df, primary_key):
         raise ValueError(f"Primary key '{primary_key}' is not unique.")
 
     return deduplicated
-
-
-def _write_data(df, transaction_type):
-    pandas_gbq.to_gbq(
-        dataframe=df,
-        destination_table=f"estate_agents.{transaction_type}",
-        project_id=project_id,
-        if_exists="replace",
-    )
-
-    return 0
 
 
 def deduplicate_data(
@@ -77,6 +111,8 @@ def deduplicate_data(
             f"Post-deduplicated data for {transaction_type} has: {len(deduplicated_df)} rows"
         )
 
-        load.write_df_to_gbq(deduplicated_df,  "estate_agents", transaction_type, if_exists="replace")
+        load.write_df_to_gbq(
+            deduplicated_df, "estate_agents", transaction_type, if_exists="replace"
+        )
 
     return 0
