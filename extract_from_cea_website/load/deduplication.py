@@ -113,7 +113,7 @@ def deduplicate_data(
 
         pandas_gbq.to_gbq(
             dataframe=deduplicated_df,
-            destionation_table=f"estate_agents.{transaction_type}",
+            destination_table=f"estate_agents.{transaction_type}",
             project_id=project_id,
             if_exists="replace",
         )
