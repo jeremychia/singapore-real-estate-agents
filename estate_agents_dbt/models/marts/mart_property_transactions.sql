@@ -89,7 +89,6 @@ with
             and property_transactions.transaction_date
             between agents_agencies.agent_licence_validity_from
             and agents_agencies.agent_licence_validity_to
-
         left join
             districts
             on coalesce(property_transactions.property_district_number, 0)
@@ -97,7 +96,60 @@ with
         left join
             towns
             on coalesce(property_transactions.property_town, ' ') = towns.property_town
+    ),
+
+    -- using a backup logic to populate agency name for those missing
+    non_null_agency_name as (select * from joined where agency_name is not null),
+
+    null_agency_name as (select * from joined where agency_name is null),
+
+    null_agency_name_get_nearest_agency_match as (
+        select
+            null_agency_name.* except (agency_name, agency_license_number),
+            backup_matching.agency_name,
+            backup_matching.agency_license_number,
+        from null_agency_name
+        left join
+            agents_agencies as backup_matching
+            on null_agency_name.agent_registration_number
+            = backup_matching.agent_registration_number
+        qualify
+            row_number() over (
+                partition by null_agency_name.transaction_id
+                order by
+                    case
+                        -- match with the nearest value
+                        when
+                            null_agency_name.transaction_date
+                            < backup_matching.agent_licence_validity_from
+                        then
+                            date_diff(
+                                backup_matching.agent_licence_validity_from,
+                                null_agency_name.transaction_date,
+                                day
+                            )
+                        when
+                            null_agency_name.transaction_date
+                            > backup_matching.agent_licence_validity_to
+                        then
+                            date_diff(
+                                null_agency_name.transaction_date,
+                                backup_matching.agent_licence_validity_to,
+                                day
+                            )
+                        else 9999  -- arbitrarily large number
+                    end
+            )
+            = 1
+    ),
+
+    unioned as (
+        select *
+        from non_null_agency_name
+        union all
+        select *
+        from null_agency_name_get_nearest_agency_match
     )
 
 select *
-from joined
+from unioned
