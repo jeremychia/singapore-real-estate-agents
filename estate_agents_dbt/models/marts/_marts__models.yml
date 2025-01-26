@@ -1,6 +1,13 @@
 version: 2
 
 models:
+  - name: mart_agency_changes
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - agent_registration_number
+            - licence_change_date
+
   - name: mart_agents
     columns:
       - name: agent_registration_number
