@@ -88,6 +88,8 @@ models:
         description: '{{ doc("agent_registration_number") }}'
       - name: agent_name
         description: '{{ doc("agent_name") }}'
+        data_tests:
+          - not_null
       - name: agent_aliases
         description: '{{ doc("agent_aliases") }}'
       - name: agent_registration_validity_from
@@ -100,5 +102,7 @@ models:
         description: '{{ doc("agent_mobile_number") }}'
       - name: agency_name
         description: '{{ doc("agency_name") }}'
+        data_tests:
+          - not_null
       - name: agency_license_number
         description: '{{ doc("agency_license_number") }}'
