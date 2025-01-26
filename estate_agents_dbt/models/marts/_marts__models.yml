@@ -4,13 +4,101 @@ models:
   - name: mart_agents
     columns:
       - name: agent_registration_number
+        description: '{{ doc("agent_registration_number") }}'
         data_tests:
           - not_null
           - unique
+      - name: agent_id
+        description: '{{ doc("agent_id") }}'
+      - name: agent_name
+        description: '{{ doc("agent_name") }}'
+      - name: agent_aliases
+        description: '{{ doc("agent_aliases") }}'
+      - name: agent_registration_validity_from
+        description: '{{ doc("agent_registration_validity_from") }}'
+      - name: agent_registration_validity_to
+        description: '{{ doc("agent_registration_validity_to") }}'
+      - name: agent_photo_url
+        description: '{{ doc("agent_photo_url") }}'
+      - name: agent_mobile_number
+        description: '{{ doc("agent_mobile_number") }}'
+      - name: count_hdb_resale
+        description: '{{ doc("count_hdb_resale") }}'
+      - name: count_hdb_rental
+        description: '{{ doc("count_hdb_rental") }}'
+      - name: count_private_sale
+        description: '{{ doc("count_private_sale") }}'
+      - name: count_private_rental
+        description: '{{ doc("count_private_rental") }}'
+      - name: count_client_buyer
+        description: '{{ doc("count_client_buyer") }}'
+      - name: count_client_seller
+        description: '{{ doc("count_client_seller") }}'
+      - name: count_client_tenant
+        description: '{{ doc("count_client_tenant") }}'
+      - name: count_client_landlord
+        description: '{{ doc("count_client_landlord") }}'
+      - name: earliest_transaction_date
+        description: '{{ doc("earliest_transaction_date") }}'
+      - name: latest_transaction_date
+        description: '{{ doc("latest_transaction_date") }}'
+      - name: agent_licence_information
+        description: '{{ doc("agent_licence_information") }}'
+      - name: agent_licence_information.agency_name
+        description: '{{ doc("agency_name") }}'
+      - name: agent_licence_information.agency_license_number
+        description: '{{ doc("agency_license_number") }}'
+      - name: agent_licence_information.agent_licence_validity_from
+        description: '{{ doc("agent_licence_validity_from") }}'
+      - name: agent_licence_information.agent_licence_validity_to
+        description: '{{ doc("agent_licence_validity_to") }}'
 
   - name: mart_property_transactions
     columns:
       - name: transaction_id
+        description: '{{ doc("transaction_id") }}'
         data_tests:
           - not_null
           - unique
+      - name: transaction_date
+        description: '{{ doc("transaction_date") }}'
+      - name: transaction_type
+        description: '{{ doc("transaction_type") }}'
+      - name: hdb_or_private
+        description: '{{ doc("hdb_or_private") }}'
+      - name: rental_or_resale
+        description: '{{ doc("rental_or_resale") }}'
+      - name: property_town
+        description: '{{ doc("property_town") }}'
+      - name: property_district_number
+        description: '{{ doc("property_district_number") }}'
+      - name: property_general_location
+        description: '{{ doc("property_general_location") }}'
+      - name: property_region
+        description: '{{ doc("property_region") }}'
+      - name: property_central_region_category
+        description: '{{ doc("property_central_region_category") }}'
+      - name: property_type
+        description: '{{ doc("property_type") }}'
+      - name: client
+        description: '{{ doc("client") }}'
+      - name: agent_id
+        description: '{{ doc("agent_id") }}'
+      - name: agent_registration_number
+        description: '{{ doc("agent_registration_number") }}'
+      - name: agent_name
+        description: '{{ doc("agent_name") }}'
+      - name: agent_aliases
+        description: '{{ doc("agent_aliases") }}'
+      - name: agent_registration_validity_from
+        description: '{{ doc("agent_registration_validity_from") }}'
+      - name: agent_registration_validity_to
+        description: '{{ doc("agent_registration_validity_to") }}'
+      - name: agent_photo_url
+        description: '{{ doc("agent_photo_url") }}'
+      - name: agent_mobile_number
+        description: '{{ doc("agent_mobile_number") }}'
+      - name: agency_name
+        description: '{{ doc("agency_name") }}'
+      - name: agency_license_number
+        description: '{{ doc("agency_license_number") }}'
