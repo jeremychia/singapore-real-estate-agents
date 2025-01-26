@@ -89,7 +89,41 @@ with
     ),
 
     joined as (
-        select *
+        select
+            agents.agent_id,
+            agents.agent_registration_number,
+            agents.agent_name,
+            agents.agent_aliases,
+            agents.agent_registration_validity_from,
+            agents.agent_registration_validity_to,
+            agents.agent_photo_url,
+            agents.agent_mobile_number,
+
+            coalesce(summarise_transactions.count_hdb_resale, 0) as count_hdb_resale,
+            coalesce(summarise_transactions.count_hdb_rental, 0) as count_hdb_rental,
+            coalesce(
+                summarise_transactions.count_private_sale, 0
+            ) as count_private_sale,
+            coalesce(
+                summarise_transactions.count_private_rental, 0
+            ) as count_private_rental,
+            coalesce(
+                summarise_transactions.count_client_buyer, 0
+            ) as count_client_buyer,
+            coalesce(
+                summarise_transactions.count_client_seller, 0
+            ) as count_client_seller,
+            coalesce(
+                summarise_transactions.count_client_tenant, 0
+            ) as count_client_tenant,
+            coalesce(
+                summarise_transactions.count_client_landlord, 0
+            ) as count_client_landlord,
+            summarise_transactions.earliest_transaction_date,
+            summarise_transactions.latest_transaction_date,
+
+            agents_agencies.agent_licence_information,
+
         from agents
         left join summarise_transactions using (agent_registration_number)
         left join agents_agencies using (agent_registration_number)
