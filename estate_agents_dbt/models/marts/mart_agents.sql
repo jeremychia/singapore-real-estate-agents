@@ -4,14 +4,27 @@ with
             agent_id,
             agent_registration_number,
             agent_name,
-            agent_alias,
+            agent_aliases,
             agent_registration_validity_from,
             agent_registration_validity_to,
             agent_photo_url,
             agent_mobile_number,
-            agency_license_number,
-            agency_name
         from {{ ref("dim_agents") }}
+    ),
+
+    agents_agencies as (
+        select
+            agent_registration_number,
+            array_agg(
+                struct(
+                    agency_name,
+                    agency_license_number,
+                    agent_licence_validity_from,
+                    agent_licence_validity_to
+                )
+            ) as agent_licence_information,
+        from {{ ref("dim_agents_agencies_scd") }}
+        group by all
     ),
 
     transactions as (
@@ -79,6 +92,7 @@ with
         select *
         from agents
         left join summarise_transactions using (agent_registration_number)
+        left join agents_agencies using (agent_registration_number)
     )
 
 select *
