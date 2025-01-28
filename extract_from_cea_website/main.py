@@ -5,7 +5,7 @@ import extract
 import load
 import load.deduplication as deduplication
 
-PROJECT_ID = "jeremy-chia"
+PROJECT_ID = "singapore-real-estate-agents"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
 headers = {
@@ -25,9 +25,9 @@ load.write_df_to_gbq(agents_df, "estate_agents", "agents", if_exists="append")
 
 deduplication.deduplicate_agents()
 
-sql = """
+sql = f"""
 select distinct registrationNumber
-from `jeremy-chia.estate_agents.agents`
+from `{PROJECT_ID}.estate_agents.agents`
 -- filter only when resuming run
 -- where registrationNumber > 'R019369D'
 order by registrationNumber asc
