@@ -1,9 +1,8 @@
 import pandas_gbq
 import pandas as pd
 from typing import Union, List
-import load
 
-project_id = "jeremy-chia"
+project_id = "singapore-real-estate-agents"
 
 
 def _read_data(transaction_type: str) -> pd.DataFrame:

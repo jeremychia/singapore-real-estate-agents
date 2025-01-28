@@ -2,7 +2,7 @@ import pandas as pd
 import pandas_gbq
 from datetime import datetime
 
-PROJECT_ID = "jeremy-chia"
+PROJECT_ID = "singapore-real-estate-agents"
 
 
 def write_df_to_gbq(df, dataset_id, table_id, if_exists="replace"):

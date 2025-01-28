@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timedelta
 import time
 
+PROJECT_ID = "singapore-real-estate-agents"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
 possible_mobile_numbers_sg = [str(number) for number in range(81167800, 98999999 + 1)]
@@ -128,7 +129,7 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
         pandas_gbq.to_gbq(
             mobile_numbers_df,
             "estate_agents.mobile_numbers",
-            "jeremy-chia",
+            f"{PROJECT-ID}",
             if_exists="append",
         )
         # Clear data for the next upload batch
