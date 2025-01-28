@@ -129,7 +129,7 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
         pandas_gbq.to_gbq(
             mobile_numbers_df,
             "estate_agents.mobile_numbers",
-            f"{PROJECT-ID}",
+            f"{PROJECT_ID}",
             if_exists="append",
         )
         # Clear data for the next upload batch
