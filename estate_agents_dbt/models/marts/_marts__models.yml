@@ -62,13 +62,17 @@ models:
 
   - name: mart_property_transactions
     columns:
-      - name: transaction_id
-        description: '{{ doc("transaction_id") }}'
+      - name: property_transaction_key
         data_tests:
           - not_null
           - unique
+      - name: transaction_id
+        description: '{{ doc("transaction_id") }}'
+        data_tests:
+          - unique
       - name: transaction_date
         description: '{{ doc("transaction_date") }}'
+      - name: transaction_month
       - name: transaction_type
         description: '{{ doc("transaction_type") }}'
       - name: hdb_or_private
@@ -96,7 +100,8 @@ models:
       - name: agent_name
         description: '{{ doc("agent_name") }}'
         data_tests:
-          - not_null
+          - not_null:
+              where: transaction_id is not null
       - name: agent_aliases
         description: '{{ doc("agent_aliases") }}'
       - name: agent_registration_validity_from
@@ -110,6 +115,7 @@ models:
       - name: agency_name
         description: '{{ doc("agency_name") }}'
         data_tests:
-          - not_null
+          - not_null:
+              where: transaction_id is not null
       - name: agency_license_number
         description: '{{ doc("agency_license_number") }}'

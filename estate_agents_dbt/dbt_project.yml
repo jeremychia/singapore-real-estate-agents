@@ -41,6 +41,12 @@ models:
       +persist_docs:
         relation: true
         columns: true
+    prep:
+      +materialized: table
+      +schema: prep
+      +persist_docs:
+        relation: true
+        columns: true
     facts:
       +materialized: table
       +schema: facts

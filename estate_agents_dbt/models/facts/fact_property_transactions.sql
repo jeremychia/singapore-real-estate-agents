@@ -3,20 +3,32 @@ with
         {{
             dbt_utils.union_relations(
                 relations=[
-                    ref("stg_estate_agents__hdb_rental"),
-                    ref("stg_estate_agents__hdb_resale"),
-                    ref("stg_estate_agents__private_rental"),
-                    ref("stg_estate_agents__private_sale"),
+                    ref("prep_property_transactions_scraped_website"),
+                    ref("prep_property_transactions_data_gov_sg"),
                 ],
                 source_column_name=None,
             )
         }}
     ),
 
+    deduplicated as (
+        select *
+        from union_relations
+        qualify
+            row_number() over (
+                partition by property_transaction_key
+                -- preference for those with transcation_id (from CEA scrapping)
+                order by if(transaction_id is not null, 1, 0) desc
+            )
+            = 1
+    ),
+
     reorder_columns as (
         select
+            property_transaction_key,
             transaction_id,
             transaction_date,
+            transaction_month,
             transaction_type,
             hdb_or_private,
             rental_or_resale,
@@ -26,7 +38,7 @@ with
             property_type,
             client,
             agent_registration_number
-        from union_relations
+        from deduplicated
     )
 
 select *

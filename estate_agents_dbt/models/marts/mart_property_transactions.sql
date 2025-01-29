@@ -1,8 +1,10 @@
 with
     property_transactions as (
         select
+            property_transaction_key,
             transaction_id,
             transaction_date,
+            transaction_month,
             transaction_type,
             hdb_or_private,
             rental_or_resale,
@@ -50,8 +52,10 @@ with
 
     joined as (
         select
+            property_transactions.property_transaction_key,
             property_transactions.transaction_id,
             property_transactions.transaction_date,
+            property_transactions.transaction_month,
             property_transactions.transaction_type,
             property_transactions.hdb_or_private,
             property_transactions.rental_or_resale,
@@ -115,7 +119,7 @@ with
             = backup_matching.agent_registration_number
         qualify
             row_number() over (
-                partition by null_agency_name.transaction_id
+                partition by null_agency_name.property_transaction_key
                 order by
                     case
                         -- match with the nearest value

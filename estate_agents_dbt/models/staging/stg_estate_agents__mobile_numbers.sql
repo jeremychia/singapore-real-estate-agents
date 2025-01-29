@@ -3,12 +3,12 @@ with
     renamed as (
         select
             mobile_number as agent_mobile_number,
-            id as agent_id,
-            registration_number as agent_registration_number,
+            trim(id) as agent_id,
+            trim(registration_number) as agent_registration_number,
             _accessed_at_utc as mobile_number_last_updated_at
         from source
     ),
-    deduplicate as (
+    deduplicated as (
         select *
         from renamed
         qualify
@@ -19,4 +19,4 @@ with
             = 1
     )
 select *
-from renamed
+from deduplicated
