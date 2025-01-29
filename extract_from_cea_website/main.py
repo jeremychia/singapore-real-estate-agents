@@ -14,14 +14,18 @@ headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'",
 }
 
-directory_payload = {"sortAscFlag": True, "sort": "name", "name": "a", "profileType": 2}
-
 directory_url = (
     "https://www.cea.gov.sg/aceas/api/internet/profile/v2/public-register/filter"
 )
 
-agents_df = extract.iteratively_retrieve_data(directory_url, headers, directory_payload)
-load.write_df_to_gbq(agents_df, "estate_agents", "agents", if_exists="append")
+vowels = ['a', 'e', 'i', 'o', 'u']
+
+# most names have vowels in them, use this to reiteratively search for agents
+for vowel in vowels:
+    directory_payload = {"sortAscFlag": True, "sort": "name", "name": f"{vowel}", "profileType": 2}
+
+    agents_df = extract.iteratively_retrieve_data(directory_url, headers, directory_payload)
+    load.write_df_to_gbq(agents_df, "estate_agents", "agents", if_exists="append")
 
 deduplication.deduplicate_agents()
 
@@ -29,10 +33,9 @@ sql = f"""
 select distinct registrationNumber
 from `{PROJECT_ID}.estate_agents.agents`
 -- filter only when resuming run
--- where registrationNumber > 'R019369D'
+-- where registrationNumber > "R071755G"
 order by registrationNumber asc
 """
-
 
 agents_df = pandas_gbq.read_gbq(query_or_table=sql, project_id=PROJECT_ID)
 
