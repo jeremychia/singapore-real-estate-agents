@@ -6,6 +6,22 @@
     "STRATA_LANDED": "Strata-Landed",
 } %}
 
+{% set hdb_or_private_map = {
+    "CONDOMINIUM_APARTMENTS": "private",
+    "EXECUTIVE_CONDOMINIUM": "private",
+    "HDB": "hdb",
+    "LANDED": "private",
+    "STRATA_LANDED": "private",
+} %}
+
+{% set rental_or_resale_map = {
+    "NEW SALE": "sale",
+    "RESALE": "resale",
+    "SUB-SALE": "sale",
+    "ROOM RENTAL": "rental",
+    "WHOLE RENTAL": "rental",
+} %}
+
 {% set transaction_type_map = {
     "NEW SALE": "New Sale",
     "RESALE": "Resale",
@@ -39,10 +55,22 @@ with
             end as property_type,
 
             case
+                {% for key, value in hdb_or_private_map.items() %}
+                    when property_type = '{{ key }}' then '{{ value }}'
+                {% endfor %}
+            end as hdb_or_private,
+
+            case
                 {% for key, value in transaction_type_map.items() %}
                     when transaction_type = '{{ key }}' then '{{ value }}'
                 {% endfor %}
             end as transaction_type,
+
+            case
+                {% for key, value in rental_or_resale_map.items() %}
+                    when transaction_type = '{{ key }}' then '{{ value }}'
+                {% endfor %}
+            end as rental_or_resale,            
 
             case
                 {% for key, value in represented_map.items() %}
@@ -60,13 +88,15 @@ with
         select
             salesperson_name as agent_name,
             transaction_date as transaction_month,
-            salesperson_reg_num as agent_registration_number,
-            property_type,
             transaction_type,
-            represented as client,
+            hdb_or_private,
+            rental_or_resale,
             town as property_town,
             district as property_district_number,
-            general_location as property_general_location
+            general_location as property_general_location,
+            property_type,
+            represented as client,
+            salesperson_reg_num as agent_registration_number,
         from cleaned
     ),
 
