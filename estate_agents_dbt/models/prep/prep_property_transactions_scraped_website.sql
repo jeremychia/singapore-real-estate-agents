@@ -48,7 +48,7 @@ with
                     cast(
                         row_number() over (
                             partition by
-                                date_trunc(transaction_date, month),
+                                transaction_month,
                                 agent_registration_number,
                                 property_type,
                                 transaction_type,
