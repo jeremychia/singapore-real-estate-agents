@@ -5,7 +5,7 @@ with
             'hdb' as hdb_or_private,
             'rental' as rental_or_resale,
             id as transaction_id,
-            date(timestamp(transactiondate), "Asia/Singapore"),
+            date(timestamp(transactiondate), "Asia/Singapore") as transaction_date,
             town as property_town,
             'HDB' as property_type,
             client,
