@@ -5,5 +5,7 @@ models:
     columns:
       - name: transaction_id
         data_tests:
-          - not_null
           - unique
+      - name: property_transaction_key
+        data_tests:
+          - not_null
