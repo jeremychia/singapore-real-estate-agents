@@ -4,7 +4,7 @@ with
             dbt_utils.union_relations(
                 relations=[
                     ref("prep_property_transactions_scraped_website"),
-                    ref("stg_data_gov_sg__property_transactions_backfill"),
+                    ref("prep_property_transactions_data_gov_sg"),
                 ],
                 source_column_name=None,
             )

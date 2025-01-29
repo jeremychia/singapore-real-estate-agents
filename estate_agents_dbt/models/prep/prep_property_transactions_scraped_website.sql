@@ -36,13 +36,13 @@ with
             md5(
                 concat(
                     coalesce(cast(transaction_month as string), ""),
-                    coalesce(agent_registration_number, ""),
-                    coalesce(property_type, ""),
-                    coalesce(transaction_type, ""),
-                    coalesce(client, ""),
-                    coalesce(property_town, ""),
+                    coalesce(trim(agent_registration_number), ""),
+                    coalesce(trim(property_type), ""),
+                    coalesce(trim(transaction_type), ""),
+                    coalesce(trim(client), ""),
+                    coalesce(trim(property_town), ""),
                     coalesce(cast(property_district_number as string), ""),
-                    coalesce(property_general_location, ""),
+                    coalesce(trim(property_general_location), ""),
                     -- consider that there may be more than one listing with these
                     -- attributes in the same month
                     cast(
