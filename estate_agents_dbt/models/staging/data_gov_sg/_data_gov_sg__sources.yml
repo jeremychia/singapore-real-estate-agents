@@ -1,0 +1,5 @@
+version: 2
+sources:
+  - name: data_gov_sg
+    tables:
+      - name: property_transactions_backfill
