@@ -1,8 +1,6 @@
 with
     data_gov_sg_backfill as (
-        select 
-            agent_registration_number,
-            agent_name,
+        select agent_registration_number, agent_name,
         from {{ ref("prep_agents_data_gov_sg") }}
     ),
 
