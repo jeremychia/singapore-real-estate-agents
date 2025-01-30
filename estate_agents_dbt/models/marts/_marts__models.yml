@@ -101,7 +101,7 @@ models:
         description: '{{ doc("agent_name") }}'
         data_tests:
           - not_null:
-              where: agent_registration_number is not null
+              where: agent_registration_number is not null and agent_registration_number != '-'
       - name: agent_aliases
         description: '{{ doc("agent_aliases") }}'
       - name: agent_registration_validity_from
