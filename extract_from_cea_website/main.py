@@ -22,6 +22,7 @@ vowels = ['a', 'e', 'i', 'o', 'u']
 
 # most names have vowels in them, use this to reiteratively search for agents
 for vowel in vowels:
+    print(f"searching: {vowel}...")
     directory_payload = {"sortAscFlag": True, "sort": "name", "name": f"{vowel}", "profileType": 2}
 
     agents_df = extract.iteratively_retrieve_data(directory_url, headers, directory_payload)
