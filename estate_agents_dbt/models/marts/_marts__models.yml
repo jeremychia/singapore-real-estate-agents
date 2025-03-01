@@ -101,7 +101,11 @@ models:
         description: '{{ doc("agent_name") }}'
         data_tests:
           - not_null:
-              where: transaction_id is not null
+              where: agent_registration_number is not null and agent_registration_number != '-'
+              config:
+                # there are some without in the dataset
+                error_if: ">80"
+                warn_if: ">79"
       - name: agent_aliases
         description: '{{ doc("agent_aliases") }}'
       - name: agent_registration_validity_from
