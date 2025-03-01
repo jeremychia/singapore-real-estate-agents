@@ -34,7 +34,7 @@ sql = f"""
 select distinct registrationNumber
 from `{PROJECT_ID}.estate_agents.agents`
 -- filter only when resuming run
--- where registrationNumber > "R071755G"
+where registrationNumber >= "R019637E"
 order by registrationNumber asc
 """
 
