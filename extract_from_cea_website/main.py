@@ -63,31 +63,35 @@ def scrape_agent_details(start_registration_number=None):
 def main():
     """Main execution script."""
     parser = argparse.ArgumentParser(description="Scrape real estate agent data.")
+
+    parser.add_argument(
+        "commands",
+        nargs="*",
+        choices=["directory", "details"],
+        help="Specify 'directory' and/or 'details' commands.",
+    )
+
     parser.add_argument(
         "-rn",
         "--start_registration",
         type=str,
-        help="Start registration number (e.g., R019637E)",
+        help="Start registration number (e.g., R012345A)",
         nargs="?",
         default=None,
-    )
-    parser.add_argument(
-        "-sd",
-        "--skip_directory",
-        action="store_true",
-        help="Skip the initial directory scrape.",
     )
 
     args = parser.parse_args()
 
-    print("Configuration:")
-    print(f"  Skip Directory: {args.skip_directory}")
-    print(f"  Start Registration: {args.start_registration or 'None'}")
-
-    if not args.skip_directory:
+    if "directory" in args.commands:
         scrape_agent_directory()
 
-    scrape_agent_details(args.start_registration)
+    if "details" in args.commands:
+        scrape_agent_details(args.start_registration)
+
+    if not args.commands:
+        parser.print_help()
+
+    return None
 
 
 if __name__ == "__main__":
