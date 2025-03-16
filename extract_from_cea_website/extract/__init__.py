@@ -5,39 +5,68 @@ from datetime import datetime, timedelta
 import load
 
 
+import time
+import requests
+
+
 def iteratively_retrieve_data(url, headers, base_payload, page_size=100):
-    # Start from page 1 and retrieve data in chunks of the specified page_size
+    """
+    Retrieves data from a paginated API, handling potential JSON decoding errors and 429 errors.
+    Implements exponential backoff for rate limiting.
+    """
     page = 1
     all_results = []
+    backoff_seconds = 128  # Initial delay for backoff (based on historical reset times)
 
     while True:
-        # Update the base payload with pagination information
-        payload = (
-            base_payload.copy()
-        )  # Copy to avoid mutating the original base_payload
+        payload = base_payload.copy()  # Avoid mutating the original base_payload
         payload.update({"page": page, "pageSize": page_size})
-
         print(f"Requesting page: {page}, pageSize: {page_size}")
 
-        # Make the request
-        response = requests.post(url, headers=headers, json=payload)
-        data = response.json()
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
 
-        # Append the results from this page to the main list
-        all_results.extend(
-            data.get("data", [])
-        )  # Adjust 'data' based on the API's response format
+            if not response.text:
+                print(f"Empty response received for page {page}. Continuing.")
+                page += 1
+                continue
 
-        # Check if there are more pages to request
-        if len(data.get("data", [])) < page_size:
-            # If the number of results is less than the page size, we've retrieved all the data
-            break
+            data = response.json()
+            all_results.extend(data.get("data", []))
 
-        # Move to the next page
-        page += 1
+            if len(data.get("data", [])) < page_size:
+                break
+
+            page += 1
+            backoff_seconds = 128  # Reset backoff on success
+
+        except requests.exceptions.HTTPError as e:
+            if response.status_code == 429:
+                print(
+                    f"429 Too Many Requests for page {page}. Retrying in {backoff_seconds} seconds."
+                )
+                time.sleep(backoff_seconds)
+                backoff_seconds *= 2  # Exponential backoff
+                continue
+            else:
+                print(f"HTTPError for page {page}: {e}. Skipping.")
+                page += 1
+                continue
+
+        except requests.exceptions.JSONDecodeError as e:
+            print(
+                f"JSONDecodeError for page {page}: {e}. Response text: {response.text}. Continuing."
+            )
+            page += 1
+            continue
+
+        except requests.exceptions.RequestException as e:
+            print(f"RequestException for page {page}: {e}. Continuing.")
+            page += 1
+            continue
 
     print(f"Total results: {len(all_results)}")
-
     return all_results
 
 
@@ -126,12 +155,18 @@ def retrieve_all_data_for_registration_numbers(
 
                     private_rental_df = pd.DataFrame(all_data["private_rental"])
                     load.write_df_to_gbq(
-                        private_rental_df, "estate_agents", "private_rental", if_exists="append"
+                        private_rental_df,
+                        "estate_agents",
+                        "private_rental",
+                        if_exists="append",
                     )
 
                     private_sale_df = pd.DataFrame(all_data["private_sale"])
                     load.write_df_to_gbq(
-                        private_sale_df, "estate_agents", "private_sale", if_exists="append"
+                        private_sale_df,
+                        "estate_agents",
+                        "private_sale",
+                        if_exists="append",
                     )
 
                     all_data = {key: [] for key in urls}  # Store data as lists
@@ -161,7 +196,10 @@ def retrieve_all_data_for_registration_numbers(
             if all_data["private_rental"]:
                 private_rental_df = pd.DataFrame(all_data["private_rental"])
                 load.write_df_to_gbq(
-                    private_rental_df, "estate_agents", "private_rental", if_exists="append"
+                    private_rental_df,
+                    "estate_agents",
+                    "private_rental",
+                    if_exists="append",
                 )
 
             if all_data["private_sale"]:
