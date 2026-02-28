@@ -2,6 +2,7 @@ import argparse
 import pandas_gbq
 import pandas as pd
 import requests
+import logging
 from curl_cffi import requests as cffi_requests
 
 # Assuming you have these modules defined elsewhere
@@ -9,6 +10,14 @@ import extract
 import load
 import load.deduplication as deduplication
 from load import get_credentials, TOKEN_PATH
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 PROJECT_ID = "singapore-real-estate-agents"
 
@@ -37,19 +46,19 @@ VOWELS = ["a", "e", "i", "o", "u"]
 
 def preflight():
     """Run preflight checks to verify all dependencies and connections."""
-    print("Running preflight checks...")
+    logger.info("Running preflight checks...")
     checks_passed = True
 
     # 1. Check GCP credentials file exists
-    print(f"  [1/3] Checking GCP credentials file... ", end="")
+    logger.info("  [1/3] Checking GCP credentials file...")
     if TOKEN_PATH.exists():
-        print("✓")
+        logger.info("        ✓ Found")
     else:
-        print(f"✗ (not found at {TOKEN_PATH})")
+        logger.error(f"        ✗ Not found at {TOKEN_PATH}")
         checks_passed = False
 
     # 2. Test BigQuery connection
-    print("  [2/3] Testing BigQuery connection... ", end="")
+    logger.info("  [2/3] Testing BigQuery connection...")
     try:
         credentials = get_credentials()
         pandas_gbq.read_gbq(
@@ -57,13 +66,13 @@ def preflight():
             project_id=PROJECT_ID,
             credentials=credentials,
         )
-        print("✓")
+        logger.info("        ✓ Connected")
     except Exception as e:
-        print(f"✗ ({e})")
+        logger.error(f"        ✗ {e}")
         checks_passed = False
 
     # 3. Test CEA API reachability
-    print("  [3/3] Testing CEA API connection... ", end="")
+    logger.info("  [3/3] Testing CEA API connection...")
     try:
         # Use curl_cffi to bypass CloudFront WAF (impersonates Chrome browser)
         response = cffi_requests.post(
@@ -76,30 +85,31 @@ def preflight():
         if response.status_code == 200:
             data = response.json()
             if "data" in data:
-                print(f"✓ (found {data.get('totalCount', 'N/A')} agents)")
+                logger.info(f"        ✓ Connected (found {data.get('totalCount', 'N/A')} agents)")
             else:
-                print("✓")
+                logger.info("        ✓ Connected")
         elif response.status_code == 403:
-            print("⚠ (403 - CloudFront WAF active, try from a different network)")
+            logger.warning("        ⚠ 403 - CloudFront WAF active, try from a different network")
         else:
-            print(f"✗ (status code: {response.status_code})")
+            logger.error(f"        ✗ Status code: {response.status_code}")
             checks_passed = False
     except Exception as e:
-        print(f"✗ ({e})")
+        logger.error(f"        ✗ {e}")
         checks_passed = False
 
     if checks_passed:
-        print("All preflight checks passed!")
+        logger.info("✅ All preflight checks passed!")
     else:
-        print("Some preflight checks failed.")
+        logger.warning("⚠️ Some preflight checks failed.")
 
     return checks_passed
 
 
 def scrape_agent_directory():
     """Scrapes agent directory using vowel-based filtering."""
-    for vowel in VOWELS:
-        print(f"searching: {vowel}...")
+    logger.info("Starting agent directory scrape...")
+    for i, vowel in enumerate(VOWELS):
+        logger.info(f"[{i+1}/{len(VOWELS)}] Searching for agents with name containing '{vowel}'")
         directory_payload = {
             "sortAscFlag": True,
             "sort": "name",
@@ -112,11 +122,15 @@ def scrape_agent_directory():
         )
         load.write_df_to_gbq(agents_df, "estate_agents", "agents", if_exists="append")
 
+    logger.info("Running deduplication...")
     deduplication.deduplicate_agents()
+    logger.info("✅ Agent directory scrape complete!")
 
 
 def scrape_agent_details(start_registration_number=None):
     """Scrapes detailed agent information from registration numbers."""
+    logger.info("Starting agent details scrape...")
+    
     sql = f"""
     SELECT DISTINCT registrationNumber
     FROM `{PROJECT_ID}.estate_agents.agents`
@@ -124,15 +138,22 @@ def scrape_agent_details(start_registration_number=None):
 
     if start_registration_number:
         sql += f" WHERE registrationNumber >= '{start_registration_number}'"
+        logger.info(f"Starting from registration number: {start_registration_number}")
 
     sql += " ORDER BY registrationNumber ASC"
 
+    logger.info("Fetching registration numbers from BigQuery...")
     agents_df = pandas_gbq.read_gbq(
         query_or_table=sql, project_id=PROJECT_ID, credentials=get_credentials()
     )
     registration_numbers = list(agents_df["registrationNumber"])
+    logger.info(f"Found {len(registration_numbers):,} registration numbers to process")
+    
     extract.retrieve_all_data_for_registration_numbers(registration_numbers, HEADERS)
+    
+    logger.info("Running deduplication...")
     deduplication.deduplicate_data(primary_key=["id"])
+    logger.info("✅ Agent details scrape complete!")
 
 
 def main():

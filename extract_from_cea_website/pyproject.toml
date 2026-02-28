@@ -9,6 +9,7 @@ dependencies = [
     "requests>=2.31.0",
     "google-auth>=2.0.0",
     "curl-cffi>=0.14.0",
+    "tqdm>=4.67.3",
 ]
 
 [project.scripts]
