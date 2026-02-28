@@ -1,12 +1,11 @@
 import requests
 import pandas as pd
 import pandas_gbq
-import os
 from datetime import datetime, timedelta
 import time
+from load import get_credentials
 
 PROJECT_ID = "singapore-real-estate-agents"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "token/gcp_token.json"
 
 possible_mobile_numbers_sg = [str(number) for number in range(81167800, 98999999 + 1)]
 
@@ -20,7 +19,8 @@ average_time = timedelta(seconds=0)
 count_mobile_numbers = len(possible_mobile_numbers_sg)
 
 # Define the API URL
-directory_url = "https://www.cea.gov.sg/aceas/api/internet/profile/v2/public-register/filter"
+CEA_BASE_URL = "https://eservices.cea.gov.sg"
+directory_url = f"{CEA_BASE_URL}/aceas/api/internet/profile/v2/public-register/filter"
 
 # Implement a retry strategy with exponential backoff
 def request_with_retry(mobile_number, retries=5, delay=1):
@@ -29,18 +29,16 @@ def request_with_retry(mobile_number, retries=5, delay=1):
     headers = {
         "Accept": "application/json, text/plain, */*",
         "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Accept-Language": "en-US,en;q=0.9,as;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
         "Connection": "keep-alive",
-        "Content-Type": "application/json;charset=UTF-8",
-        "DNT": "1",
-        "Host": "www.cea.gov.sg",
-        "Origin": "https://www.cea.gov.sg",
-        "Referer": f"https://www.cea.gov.sg/aceas/public-register/sales/1?page=1&pageSize=10&sortAscFlag=true&sort=name&contactNumber={mobile_number}",
+        "Content-Type": "application/json",
+        "Origin": CEA_BASE_URL,
+        "Referer": f"{CEA_BASE_URL}/aceas/public-register/sales/1?page=1&pageSize=10&sortAscFlag=true&sort=name&contactNumber={mobile_number}",
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        "sec-ch-ua": '"Chromium";v="131", "Not_A Brand";v="24"',
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+        "sec-ch-ua": '"Chromium";v="145", "Not:A-Brand";v="99"',
         "sec-ch-ua-mobile": "?0",
         "sec-ch-ua-platform": '"macOS"'
     }
@@ -87,10 +85,6 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
         "profileType": 2,
     }
 
-    directory_url = (
-        "https://www.cea.gov.sg/aceas/api/internet/profile/v2/public-register/filter"
-    )
-
     data = request_with_retry(mobile_number)
 
     if data:
@@ -129,8 +123,9 @@ for idx, mobile_number in enumerate(possible_mobile_numbers_sg):
         pandas_gbq.to_gbq(
             mobile_numbers_df,
             "estate_agents.mobile_numbers",
-            f"{PROJECT-ID}",
+            PROJECT_ID,
             if_exists="append",
+            credentials=get_credentials(),
         )
         # Clear data for the next upload batch
         mobile_numbers = []

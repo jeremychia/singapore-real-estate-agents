@@ -1,8 +1,19 @@
 import pandas as pd
 import pandas_gbq
 from datetime import datetime
+from google.oauth2 import service_account
+from pathlib import Path
 
 PROJECT_ID = "singapore-real-estate-agents"
+TOKEN_PATH = Path(__file__).parent.parent / "token" / "gcp_token.json"
+
+
+def get_credentials():
+    """Load credentials from the service account JSON file."""
+    return service_account.Credentials.from_service_account_file(
+        TOKEN_PATH,
+        scopes=["https://www.googleapis.com/auth/bigquery"],
+    )
 
 
 def write_df_to_gbq(df, dataset_id, table_id, if_exists="replace"):
@@ -26,7 +37,11 @@ def write_df_to_gbq(df, dataset_id, table_id, if_exists="replace"):
 
     # Write the DataFrame to BigQuery
     pandas_gbq.to_gbq(
-        df, destination_table=table_full_id, project_id=PROJECT_ID, if_exists=if_exists
+        df,
+        destination_table=table_full_id,
+        project_id=PROJECT_ID,
+        if_exists=if_exists,
+        credentials=get_credentials(),
     )
 
     print(

@@ -1,6 +1,7 @@
 import pandas_gbq
 import pandas as pd
 from typing import Union, List
+from load import get_credentials
 
 project_id = "singapore-real-estate-agents"
 
@@ -16,7 +17,9 @@ def _read_data(transaction_type: str) -> pd.DataFrame:
     pd.DataFrame: The resulting DataFrame sorted by '_accessed_at_utc'.
     """
     df = pandas_gbq.read_gbq(
-        query_or_table=f"estate_agents.{transaction_type}", project_id=project_id
+        query_or_table=f"estate_agents.{transaction_type}",
+        project_id=project_id,
+        credentials=get_credentials(),
     )
 
     # sort by _accessed_at_utc (when data was downloaded) as dedup is by keeping first value
@@ -115,6 +118,7 @@ def deduplicate_data(
             destination_table=f"estate_agents.{transaction_type}",
             project_id=project_id,
             if_exists="replace",
+            credentials=get_credentials(),
         )
 
     return 0
@@ -142,6 +146,7 @@ def deduplicate_agents():
         destination_table="estate_agents.agents",
         project_id=project_id,
         if_exists="replace",
+        credentials=get_credentials(),
     )
 
     return 0

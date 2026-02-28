@@ -94,11 +94,12 @@ def retrieve_all_data_for_registration_numbers(
     :return: Dictionary of DataFrames for each transaction type
     """
     # URLs for the different transaction types
+    CEA_BASE_URL = "https://eservices.cea.gov.sg"
     urls = {
-        "hdb_resale": "https://www.cea.gov.sg/aceas/api/internet/property-txn/v1/public-register/hdb-resale/filter",
-        "hdb_rental": "https://www.cea.gov.sg/aceas/api/internet/property-txn/v1/public-register/hdb-rental/filter",
-        "private_rental": "https://www.cea.gov.sg/aceas/api/internet/property-txn/v1/public-register/private-rental/filter",
-        "private_sale": "https://www.cea.gov.sg/aceas/api/internet/property-txn/v1/public-register/private-sale/filter",
+        "hdb_resale": f"{CEA_BASE_URL}/aceas/api/internet/property-txn/v1/public-register/hdb-resale/filter",
+        "hdb_rental": f"{CEA_BASE_URL}/aceas/api/internet/property-txn/v1/public-register/hdb-rental/filter",
+        "private_rental": f"{CEA_BASE_URL}/aceas/api/internet/property-txn/v1/public-register/private-rental/filter",
+        "private_sale": f"{CEA_BASE_URL}/aceas/api/internet/property-txn/v1/public-register/private-sale/filter",
     }
 
     # Base payload for transactions
